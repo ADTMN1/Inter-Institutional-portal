@@ -1,4 +1,3 @@
-// middlewares/log.js
 const db = require("../config/db");
 
 module.exports = (req, res, next) => {
@@ -20,33 +19,40 @@ module.exports = (req, res, next) => {
       timestamp: new Date(),
     };
 
+    // Always log to console
     console.log(
       `[${logEntry.timestamp.toISOString()}] ${method} ${originalUrl} - ${
         res.statusCode
       } - ${duration}ms - User: ${userId || "Guest"} (${userRole || "N/A"})`
     );
 
-    const institutionId = req.user ? req.user.institution_id : null;
+    // Only log to database if connection is available
+    if (db && db.state !== "disconnected") {
+      const institutionId = req.user ? req.user.institution_id : null;
 
-    const query = `INSERT INTO api_requests
-  (method, url, http_status, duration_ms, user_id, user_role, institution_id, created_at)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-    const values = [
-      logEntry.method,
-      logEntry.url,
-      logEntry.status,
-      logEntry.duration_ms,
-      logEntry.user_id,
-      logEntry.user_role,
-      institutionId,
-      logEntry.timestamp,
-    ];
+      const query = `INSERT INTO api_requests
+        (method, url, http_status, duration_ms, user_id, user_role, institution_id, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+      const values = [
+        logEntry.method,
+        logEntry.url,
+        logEntry.status,
+        logEntry.duration_ms,
+        logEntry.user_id,
+        logEntry.user_role,
+        institutionId,
+        logEntry.timestamp,
+      ];
 
-    db.query(query, values, (err) => {
-      if (err) {
-        console.error("Failed to log API request:", err);
-      }
-    });
+      db.query(query, values, (err) => {
+        if (err) {
+          console.error("Failed to log API request to database:", err.message);
+        }
+      });
+    } else {
+      console.log("⚠️  Database not available - skipping database logging");
+    }
   });
+
   next();
 };
