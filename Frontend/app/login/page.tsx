@@ -18,51 +18,66 @@ export default function LoginPage() {
     }
 
     try {
+      console.log(
+        "Attempting login to:",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`
+      );
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include", // important to send cookies
+          credentials: "include",
           body: JSON.stringify({ email, password }),
         }
       );
 
-      const data = await response.json();
+      console.log("Response status:", response.status);
+
+      // Get the response text first to see what's coming back
+      const responseText = await response.text();
+      console.log("Raw response:", responseText);
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("JSON parse error:", parseError);
+        setError("Server returned invalid response");
+        return;
+      }
 
       if (!response.ok) {
-        setError(data.message || "Login failed");
+        console.error("Login failed:", data);
+        setError(data.message || `Login failed (Status: ${response.status})`);
         return;
       }
 
-      // After successful login, fetch user info from backend (using cookie)
-      const userRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`,
-        {
-          credentials: "include",
+      console.log("Login successful, data:", data);
+
+      // If login is successful, you might not need the /api/auth/me call immediately
+      // Let's simplify and just use the data from login response
+      if (data.success && data.user) {
+        const userRole = data.user.role?.toLowerCase() || data.user.role;
+
+        console.log("User role:", userRole);
+
+        if (userRole === "admin") {
+          router.push("/admin");
+        } else if (userRole === "contactperson") {
+          router.push("/welcome");
+        } else if (userRole === "universal") {
+          router.push("/universal");
+        } else {
+          router.push("/");
         }
-      );
-
-      if (!userRes.ok) {
-        setError("Failed to get user info");
-        return;
-      }
-
-      const { user } = await userRes.json();
-      const userRole = user.role.toLowerCase();
-
-      if (userRole === "admin") {
-        router.push("/admin");
-      } else if (userRole === "contactperson") {
-        router.push("/welcome");
-      } else if (userRole === "universal") {
-        router.push("/universal");
       } else {
-        router.push("/");
+        setError("Invalid response from server");
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("An unexpected error occurred. Please try again.");
+      setError("Network error. Please check your connection and try again.");
     }
   };
 
