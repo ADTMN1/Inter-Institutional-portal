@@ -1,0 +1,711 @@
+const db = require("../config/db");
+
+// Submit Request Controller
+exports.submitRequest = (req, res) => {
+  const userId = req.user?.id; // sender user ID
+  const senderInstitutionId = req.user?.institution_id;
+
+  console.log("Submit request invoked");
+  console.log("req.user:", req.user);
+
+  if (!userId) {
+    console.warn("Unauthorized: no userId found");
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const {
+    institutionId,
+    services,
+    title,
+    description,
+    status = "Submitted",
+  } = req.body;
+
+  console.log("Request body:", req.body);
+
+  // Validate recipient institution
+  db.query(
+    "SELECT * FROM institutions WHERE id = ?",
+    [institutionId],
+    (instErr, instResult) => {
+      if (instErr) {
+        console.error("Database error fetching institution:", instErr);
+        return res.status(500).json({ message: "Database error" });
+      }
+
+      if (instResult.length === 0) {
+        console.warn("Recipient institution not found for id:", institutionId);
+        return res
+          .status(404)
+          .json({ message: "Recipient institution not found" });
+      }
+
+      const institutionName = instResult[0].name;
+      console.log("Recipient institution found:", institutionName);
+
+      // Insert request
+      const sqlRequest = `
+        INSERT INTO requests 
+          (user_id, institutionId, institutionName, services, title, description, status, createdAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+      `;
+
+      db.query(
+        sqlRequest,
+        [
+          userId,
+          institutionId,
+          institutionName,
+          JSON.stringify(services),
+          title,
+          description,
+          status,
+        ],
+        (reqErr, reqResult) => {
+          if (reqErr) {
+            console.error("Error inserting request:", reqErr);
+            return res
+              .status(500)
+              .json({ message: "Failed to submit request" });
+          }
+
+          const requestId = reqResult.insertId;
+          console.log("Request inserted with ID:", requestId);
+
+          const notificationMessage = `New request submitted: ${title}`;
+
+          // Insert notification (include user_id!)
+          const sqlNotification = `
+            INSERT INTO notifications 
+              (requestId, institution_id, user_id, message, isRead, createdAt)
+            VALUES (?, ?, ?, ?, false, NOW())
+          `;
+
+          db.query(
+            sqlNotification,
+            [requestId, institutionId, userId, notificationMessage],
+            (notifErr) => {
+              if (notifErr) {
+                console.error("Error inserting notification:", notifErr);
+                return res.status(201).json({
+                  message:
+                    "Request submitted, but failed to notify recipient institution",
+                });
+              }
+
+              console.log("Notification inserted for user:", userId);
+              res.status(201).json({
+                message:
+                  "Request submitted and recipient institution notified successfully",
+              });
+            }
+          );
+        }
+      );
+    }
+  );
+};
+
+exports.sendRequest = (req, res) => {
+  const fromInstitutionId = req.user.institutionId; // sender
+  const { toInstitutionId, subject, description } = req.body;
+
+  const sql = `
+    INSERT INTO requests (from_institution_id, to_institution_id, subject, description, status, created_at)
+    VALUES (?, ?, ?, ?, 'pending', NOW())
+  `;
+
+  db.query(
+    sql,
+    [fromInstitutionId, toInstitutionId, subject, description],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+
+      // Optionally create notification for receiver
+      const notifSql = `
+      INSERT INTO notifications (institution_id, message, isRead, created_at)
+      VALUES (?, ?, 0, NOW())
+    `;
+      const message = `You have received a new request from institution ${fromInstitutionId}`;
+      db.query(notifSql, [toInstitutionId, message], (nErr) => {
+        if (nErr) return res.status(500).json({ error: nErr.message });
+        res.json({ message: "Request sent successfully" });
+      });
+    }
+  );
+};
+
+exports.getInstitutions = (req, res) => {
+  db.query("SELECT * FROM institutions", (err, results) => {
+    if (err) {
+      console.error("Error fetching institutions:", err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(results);
+  });
+};
+
+// POST stop conversation
+exports.stopConversation = (req, res) => {
+  const { id } = req.params;
+  db.query(
+    "UPDATE requests SET conversationActive = FALSE WHERE id = ?",
+    [id],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: "Conversation stopped." });
+    }
+  );
+};
+
+exports.getAllRequests = (req, res) => {
+  const sql = `SELECT * FROM requests ORDER BY createdAt DESC`;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Failed to fetch requests:", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+
+    const formatted = results.map((row) => {
+      let parsedServices = [];
+
+      try {
+        parsedServices = JSON.parse(row.services || "[]");
+        if (!Array.isArray(parsedServices)) {
+          parsedServices = [parsedServices]; // force into array
+        }
+      } catch (e) {
+        console.warn("Invalid JSON in services field:", row.services);
+        parsedServices = row.services ? [row.services] : [];
+      }
+
+      return {
+        ...row,
+        services: parsedServices,
+        date: row.createdAt,
+        lastUpdated: row.updatedAt,
+      };
+    });
+
+    res.json(formatted);
+  });
+};
+
+// controllers/notifications.js
+exports.getNotifications = (req, res) => {
+  // Step 1: Log JWT user info
+  console.log("req.user:", req.user);
+
+  if (!req.user || !req.user.id) {
+    console.warn("No user id found in JWT payload!");
+    return res.status(401).json({ error: "Unauthorized: No user ID" });
+  }
+
+  const userId = req.user.id;
+  console.log("Fetching notifications for userId:", userId);
+
+  // Step 2: SQL query
+  const sql = `
+    SELECT n.id, n.title, n.message, n.type, n.createdAt as timestamp, 
+           n.isRead, r.id as requestId, r.title as requestTitle, p.name as provider
+    FROM notifications n
+    JOIN requests r ON n.requestId = r.id
+    JOIN providers p ON r.providerId = p.id
+    WHERE n.userId = ?
+    ORDER BY n.createdAt DESC
+  `;
+
+  console.log("SQL Query:", sql);
+
+  // Step 3: Execute query
+  db.query(sql, [userId], (err, results) => {
+    if (err) {
+      console.error("SQL error:", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+
+    console.log("Raw DB results:", results);
+
+    if (!results.length) {
+      console.warn(`No notifications found for user ${userId}`);
+    }
+
+    // Step 4: Format results
+    const formatted = results.map((n) => ({
+      id: n.id,
+      title: n.title || `Update for: ${n.requestTitle}`,
+      message:
+        n.message ||
+        `You have an update for "${n.requestTitle}" from ${n.provider}.`,
+      type: n.type || "info",
+      timestamp: n.timestamp,
+      read: !!n.isRead,
+      requestId: n.requestId,
+      provider: n.provider,
+    }));
+
+    console.log("Formatted notifications:", formatted);
+
+    res.json(formatted);
+  });
+};
+
+// POST resume conversation
+exports.resumeConversation = (req, res) => {
+  const { id } = req.params;
+  db.query(
+    "UPDATE requests SET conversationActive = TRUE WHERE id = ?",
+    [id],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: "Conversation resumed." });
+    }
+  );
+};
+
+// POST save admin note
+exports.saveAdminNote = (req, res) => {
+  const { id } = req.params;
+  const { note } = req.body;
+  db.query(
+    "UPDATE requests SET adminNote = ? WHERE id = ?",
+    [note, id],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: "Admin note saved." });
+    }
+  );
+};
+
+exports.approveRequest = (req, res) => {
+  const { id } = req.params;
+  db.query(
+    "UPDATE requests SET status = ?, decisionDate = ? WHERE id = ?",
+    ["approved", new Date(), id],
+    (error, result) => {
+      if (error) {
+        console.error("Error approving request:", error);
+        return res.status(500).json({ message: "Internal server error" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Request not found" });
+      }
+
+      res.json({ message: "Request approved successfully" });
+    }
+  );
+};
+
+exports.rejectRequest = (req, res) => {
+  const { id } = req.params;
+  const query =
+    "UPDATE requests SET status = ?, decisionDate = ?, reason = ? WHERE id = ?";
+  const values = ["rejected", new Date(), "Manually rejected by provider", id];
+
+  db.query(query, values, (err, result) => {
+    if (err) {
+      console.error("Error rejecting request:", err);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    res.json({ message: "Request rejected successfully" });
+  });
+};
+
+exports.getHistory = (req, res) => {
+  const institutionId = req.user?.institution_id;
+
+  if (!institutionId)
+    return res.status(403).json({ message: "Unauthorized: no institution" });
+
+  // Fetch all requests for this institution
+  const sql = "SELECT * FROM requests WHERE institutionId = ?";
+
+  db.query(sql, [institutionId], (err, results) => {
+    if (err) return res.status(500).json({ message: "Database error" });
+    res.json(results);
+  });
+};
+
+exports.getSubmitted = (req, res) => {
+  const institutionId = req.user?.institution_id;
+
+  if (!institutionId)
+    return res.status(403).json({ message: "Unauthorized: no institution" });
+
+  const sql =
+    "SELECT * FROM requests WHERE institutionId = ? AND status = 'Submitted'";
+  db.query(sql, [institutionId], (err, results) => {
+    if (err) return res.status(500).json({ message: "Database error" });
+    res.json(results);
+  });
+};
+
+exports.requestMoreInfo = (req, res) => {
+  const requestId = req.params.id;
+  const { message } = req.body;
+
+  if (!message || message.trim() === "") {
+    return res.status(400).json({ message: "Message is required." });
+  }
+
+  const getRequesterQuery =
+    "SELECT user_id AS requester_id FROM requests WHERE id = ?";
+  db.query(getRequesterQuery, [requestId], (err, result) => {
+    if (err || result.length === 0) {
+      console.error("Error finding requester:", err);
+      return res.status(404).json({ message: "Request not found." });
+    }
+
+    const requesterId = result[0].requester_id;
+
+    const insertNotificationQuery = `
+  INSERT INTO notifications (user_id, requestId, message)
+  VALUES (?, ?, ?)
+`;
+
+    db.query(
+      insertNotificationQuery,
+      [requesterId, requestId, message],
+      (insertErr) => {
+        if (insertErr) {
+          console.error("Error saving notification:", insertErr);
+          return res
+            .status(500)
+            .json({ message: "Failed to send info request." });
+        }
+        res.status(200).json({ message: "Info request sent successfully." });
+      }
+    );
+  });
+};
+
+exports.getRequestStats = (req, res) => {
+  const stats = {
+    totalConsumers: 0,
+    activeAPIs: 0,
+  };
+
+  // Query 1: total unique consumers
+  db.query(
+    "SELECT COUNT(DISTINCT user_id) AS totalConsumers FROM requests",
+    (err, result1) => {
+      if (err) {
+        console.error("Error getting totalConsumers:", err);
+        return res.status(500).json({ message: "Failed to get consumers" });
+      }
+
+      stats.totalConsumers = result1[0].totalConsumers;
+
+      // Query 2: active APIs from `services` field
+      db.query(`SELECT services FROM requests`, (err, result2) => {
+        if (err) {
+          console.error("Error getting activeAPIs:", err);
+          return res.status(500).json({ message: "Failed to get active APIs" });
+        }
+
+        const apiSet = new Set();
+
+        result2.forEach((row) => {
+          try {
+            const services = JSON.parse(row.services);
+            services.flat().forEach((api) => apiSet.add(api));
+          } catch (e) {
+            console.warn("Failed to parse services:", row.services);
+          }
+        });
+
+        stats.activeAPIs = apiSet.size;
+
+        // Send the final stats response
+        return res.json(stats);
+      });
+    }
+  );
+};
+exports.requestMoreInfo = (req, res) => {
+  const { message } = req.body;
+  const requestId = req.params.id;
+  const userId = req.user?.id; // logged-in user
+  const institutionId = req.user?.institution_id;
+
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const query = `
+    INSERT INTO notifications (requestId, message, isRead, institution_id, user_id)
+    VALUES (?, ?, 0, ?, ?)
+  `;
+
+  db.query(
+    query,
+    [requestId, message, institutionId, userId],
+    (err, results) => {
+      if (err) {
+        console.error("Error sending notification:", err);
+        return res.status(500).json({ message: "Internal server error" });
+      }
+      res.json({ success: true });
+    }
+  );
+};
+
+exports.getNotifications = (req, res) => {
+  const userId = req.user?.id;
+
+  console.log("Incoming request for notifications");
+  console.log("req.user:", req.user);
+
+  if (!userId) {
+    console.warn("No userId found in request");
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const query = `
+    SELECT * 
+    FROM notifications 
+    WHERE user_id = ?
+    ORDER BY createdAt DESC
+    LIMIT 50
+  `;
+
+  console.log("Executing SQL:", query);
+  console.log("With userId:", userId);
+
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error("Error fetching notifications:", err);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    console.log("Raw notifications fetched:", results);
+
+    if (results.length === 0) {
+      console.warn("No notifications found for this user.");
+    }
+
+    const formatted = results.map((n) => ({
+      id: n.id,
+      title: n.title || "No title",
+      message: n.message || "No message",
+      type: n.type || "info",
+      timestamp: n.createdAt,
+      read: !!n.isRead,
+      requestId: n.requestId,
+      providerId: n.institution_id,
+    }));
+
+    console.log("Formatted notifications:", formatted);
+
+    res.json(formatted);
+  });
+};
+
+// exports.getMyRequests = (req, res) => {
+//   const userId = req.user?.id;
+//   if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+//   const sql = "SELECT * FROM requests WHERE user_id = ?";
+//   db.query(sql, [userId], (err, results) => {
+//     if (err) {
+//       console.error(err);
+//       return res.status(500).json({ message: "Database error" });
+//     }
+
+//     // Parse services JSON for frontend
+//     const parsedResults = results.map((r) => ({
+//       ...r,
+//       services: r.services, // already an array
+//       date: r.createdAt,
+//       lastUpdated: r.updatedAt,
+//     }));
+
+//     res.json(parsedResults);
+//   });
+// };
+
+exports.getInstitutionRequests = (req, res) => {
+  const user = req.user; // set by auth middleware
+  if (!user || !user.institution_id) {
+    return res.status(403).json({ message: "Not an institution user" });
+  }
+
+  const sql = "SELECT * FROM universal WHERE JSON_CONTAINS(institution_ids, ?)";
+
+  db.query(sql, [JSON.stringify(user.institution_id)], (err, rows) => {
+    if (err) {
+      console.error("Error fetching requests:", err);
+      return res.status(500).json({
+        success: false,
+        message: "Server error",
+        error: err.message,
+      });
+    }
+
+    // Optional: only fetch those that haven't been notified yet
+    const filteredRows = rows.filter((row) => row.is_notified === 0);
+
+    res.json({ success: true, requests: filteredRows });
+  });
+};
+
+exports.sendInfo = (req, res) => {
+  const requestId = req.params.id;
+  const { endpointUrl, accessToken, notes } = req.body;
+  const userId = req.user?.id;
+  const institutionId = req.user?.institution_id;
+
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+  // Check if request exists
+  db.query(
+    "SELECT * FROM requests WHERE id = ?",
+    [requestId],
+    (err, results) => {
+      if (err) {
+        console.error("DB error:", err);
+        return res.status(500).json({ message: "Database error" });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ message: "Request not found" });
+      }
+
+      // Update request with sent info
+      const sql = `
+      UPDATE requests
+      SET responseData = ?, status = 'info-sent', updatedAt = NOW()
+      WHERE id = ?
+    `;
+      const responseData = JSON.stringify({
+        endpointUrl,
+        accessToken,
+        notes,
+        sentAt: new Date(),
+      });
+
+      db.query(sql, [responseData, requestId], (updateErr) => {
+        if (updateErr) {
+          console.error("Error updating request:", updateErr);
+          return res.status(500).json({ message: "Failed to send info" });
+        }
+
+        // Optional: create notification for requester
+        const requesterId = results[0].user_id;
+        const notifSql = `
+        INSERT INTO notifications (user_id, requestId, message)
+        VALUES (?, ?, ?)
+      `;
+        const message = `Information has been sent for request "${results[0].title}"`;
+
+        db.query(notifSql, [requesterId, requestId, message], (notifErr) => {
+          if (notifErr) {
+            console.error("Error creating notification:", notifErr);
+            // Not critical, still return success
+          }
+
+          res.status(200).json({ message: "Information sent successfully." });
+        });
+      });
+    }
+  );
+};
+
+exports.getMyRequests = (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+  const sql = "SELECT * FROM requests WHERE user_id = ?";
+  db.query(sql, [userId], (err, results) => {
+    if (err) return res.status(500).json({ message: "Database error" });
+
+    const formatted = results.map((r) => {
+      let providerResponse = null;
+      if (r.responseData) {
+        try {
+          providerResponse = JSON.parse(r.responseData); // <-- use responseData
+        } catch (e) {
+          console.warn("Invalid JSON in responseData:", r.responseData);
+          providerResponse = null;
+        }
+      }
+
+      let services = [];
+      try {
+        services = JSON.parse(r.services || "[]");
+        if (!Array.isArray(services)) services = [services];
+      } catch {
+        services = [];
+      }
+
+      return {
+        id: r.id,
+        institutionId: r.institutionId,
+        institutionName: r.institutionName,
+        title: r.title,
+        description: r.description,
+        services,
+        status: r.status,
+        date: r.createdAt,
+        lastUpdated: r.updatedAt,
+        providerResponse, // now correctly uses responseData
+      };
+    });
+
+    res.json(formatted);
+  });
+};
+
+exports.getRequestById = (req, res) => {
+  const requestId = req.params.id;
+  const userId = req.user?.id;
+
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+  const sql = "SELECT * FROM requests WHERE id = ?";
+
+  db.query(sql, [requestId], (err, results) => {
+    if (err) {
+      console.error("Error fetching request:", err);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    const r = results[0];
+
+    let services = [];
+    let providerResponse = null;
+
+    try {
+      services = JSON.parse(r.services || "[]");
+      if (!Array.isArray(services)) services = [services];
+    } catch {}
+
+    try {
+      providerResponse = r.responseData ? JSON.parse(r.responseData) : null;
+    } catch {}
+
+    res.json({
+      id: r.id,
+      institutionId: r.institutionId,
+      institutionName: r.institutionName,
+      title: r.title,
+      description: r.description,
+      services,
+      status: r.status,
+      date: r.createdAt,
+      lastUpdated: r.updatedAt,
+      providerResponse,
+    });
+  });
+};
