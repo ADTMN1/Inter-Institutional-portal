@@ -45,39 +45,40 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
+
       try {
-        const institutionsRes = await axios.get("/api/admin/institutions", {
-          withCredentials: true,
-        });
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL;
+
+        // Fetch institutions
+        const institutionsRes = await axios.get(
+          `${backendUrl}/api/admin/institutions`,
+          { withCredentials: true }
+        );
 
         console.log("Institutions API response:", institutionsRes.data);
 
-        const institutionsData =
-          institutionsRes.data.institutions || institutionsRes.data;
-
-        if (Array.isArray(institutionsData)) {
-          setInstitutions(institutionsData);
-        } else {
-          setInstitutions([]);
-          console.warn("Institutions data is not an array", institutionsData);
-        }
+        const institutionsData = institutionsRes.data.institutions || [];
+        setInstitutions(
+          Array.isArray(institutionsData) ? institutionsData : []
+        );
 
         setInstitutionStats({
           total: institutionsRes.data.total?.toString() || "0",
           change: institutionsRes.data.change || "",
         });
 
-        const usersRes = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/admin/user-stats`,
-          {
-            withCredentials: true,
-          }
-        );
+        // Fetch total users
+        const usersRes = await axios.get(`${backendUrl}/api/admin/user-stats`, {
+          withCredentials: true,
+        });
 
         setTotalUsers(usersRes.data.totalUsers?.toString() || "0");
         setUsersChange(usersRes.data.change || "");
       } catch (error) {
-        console.error("Failed to fetch data:", error);
+        console.error("Failed to fetch dashboard data:", error);
+        setInstitutions([]);
+        setInstitutionStats({ total: "0", change: "" });
         setTotalUsers("Error");
         setUsersChange("");
       } finally {
