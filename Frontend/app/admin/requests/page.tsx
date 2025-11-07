@@ -73,7 +73,7 @@ export default function RequestsPage() {
     async function fetchRequests() {
       try {
         const res = await fetch(
-          "${process.env.NEXT_PUBLIC_API_URL}/api/requests"
+          `${process.env.NEXT_PUBLIC_API_URL}/api/requests`
         );
         if (!res.ok) throw new Error("Failed to fetch requests");
         const data = await res.json();
@@ -95,7 +95,7 @@ export default function RequestsPage() {
       setError(null);
       try {
         const response = await fetch(
-          "${process.env.NEXT_PUBLIC_API_URL}/api/requests/:requestId/notifications"
+          `${process.env.NEXT_PUBLIC_API_URL}/api/requests/:requestId/notifications`
         ); // your API endpoint here
         if (!response.ok) {
           throw new Error("Failed to fetch notifications");
@@ -317,7 +317,7 @@ export default function RequestsPage() {
     setIsRefreshing(true);
     try {
       const res = await fetch(
-        "${process.env.NEXT_PUBLIC_API_URL}/api/requests"
+        `${process.env.NEXT_PUBLIC_API_URL}/api/requests`
       );
       const data = await res.json();
       setRequests(data);

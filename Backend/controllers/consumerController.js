@@ -6,7 +6,7 @@ exports.fetchApiUrl = async (req, res) => {
     const { service_title, description, purpose } = req.body;
 
     const providerResponse = await axios.post(
-      "${process.env.NEXT_PUBLIC_API_URL}/provider/get-api-url",
+      `${process.env.NEXT_PUBLIC_API_URL}/provider/get-api-url`,
       { service_title, description, purpose }
     );
 

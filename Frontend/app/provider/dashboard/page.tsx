@@ -57,7 +57,7 @@ export default function ProviderDashboard() {
       try {
         // Fetch requests
         const res = await fetch(
-          "${process.env.NEXT_PUBLIC_API_URL}/api/requests",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/requests`,
           {
             credentials: "include",
           }
@@ -119,7 +119,7 @@ export default function ProviderDashboard() {
     const fetchStatsExtras = async () => {
       try {
         const res = await fetch(
-          "${process.env.NEXT_PUBLIC_API_URL}/api/requests/stats"
+          `${process.env.NEXT_PUBLIC_API_URL}/api/requests/stats`
         );
         if (!res.ok) throw new Error("Failed to fetch stats");
         const data = await res.json();

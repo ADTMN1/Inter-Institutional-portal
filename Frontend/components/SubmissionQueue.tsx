@@ -89,7 +89,7 @@ export const SubmissionQueue = ({
       });
 
       const response = await fetch(
-        "${process.env.NEXT_PUBLIC_API_URL}/api/submit",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/submit`,
         {
           method: "POST",
           body: formData,

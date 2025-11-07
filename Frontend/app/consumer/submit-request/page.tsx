@@ -52,7 +52,7 @@ export default function SubmitRequestPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("${process.env.NEXT_PUBLIC_API_URL}/api/requests/institutions", {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/requests/institutions`, {
       method: "GET",
       credentials: "include",
     })
@@ -138,7 +138,7 @@ export default function SubmitRequestPage() {
 
     try {
       const res = await fetch(
-        "${process.env.NEXT_PUBLIC_API_URL}/api/requests",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/requests`,
         {
           method: "POST",
           headers: {

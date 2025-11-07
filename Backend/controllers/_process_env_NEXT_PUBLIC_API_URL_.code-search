@@ -1,0 +1,229 @@
+# Query: ${process.env.NEXT_PUBLIC_API_URL}
+# ContextLines: 1
+
+51 results - 21 files
+
+Backend\controllers\consumerController.js:
+  8      const providerResponse = await axios.post(
+  9:       `${process.env.NEXT_PUBLIC_API_URL}/provider/get-api-url`,
+  10        { service_title, description, purpose }
+
+Frontend\next.config.mjs:
+  16    //       source: "/api/:path*",
+  17:   //       destination: "${process.env.NEXT_PUBLIC_API_URL}/api/:path*",
+  18    //     },
+
+Frontend\app\admin\dashboard\page.tsx:
+   70          const usersRes = await axios.get(
+   71:           `${process.env.NEXT_PUBLIC_API_URL}/api/admin/user-stats`,
+   72            {
+
+  115          await axios.get(
+  116:           `${process.env.NEXT_PUBLIC_API_URL}/api/admin/institutions`,
+  117            {
+
+Frontend\app\admin\institutions\page.tsx:
+   66          const response = await fetch(
+   67:           `${process.env.NEXT_PUBLIC_API_URL}/api/admin/institutions`,
+   68            {
+
+  538                          const response = await fetch(
+  539:                           `${process.env.NEXT_PUBLIC_API_URL}/api/institution/${selectedInstitution.id}`,
+  540                            {
+
+Frontend\app\admin\institutions\RegisterInstitutionForm.tsx:
+  190        const response = await fetch(
+  191:         `${process.env.NEXT_PUBLIC_API_URL}/api/admin/institutions`,
+  192          {
+
+Frontend\app\admin\notifications\page.tsx:
+  62        const res = await fetch(
+  63:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${requestId}/notifications`
+  64        );
+
+  76      await fetch(
+  77:       `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${id}/read`,
+  78        {
+
+  88      await fetch(
+  89:       `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${id}/unread`,
+  90        {
+
+Frontend\app\admin\requests\page.tsx:
+   75          const res = await fetch(
+   76:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests`
+   77          );
+
+   97          const response = await fetch(
+   98:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests/:requestId/notifications`
+   99          ); // your API endpoint here
+
+  159          const res = await fetch(
+  160:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests${request.id}`
+  161          );
+
+  182        const res = await fetch(
+  183:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${requestId}/stop-conversation`,
+  184          {
+
+  206        const res = await fetch(
+  207:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${requestId}/resume-conversation`,
+  208          {
+
+  319        const res = await fetch(
+  320:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests`
+  321        );
+
+Frontend\app\consumer\[requestId]\[id]\page.tsx:
+  37      axios
+  38:       .get(`${process.env.NEXT_PUBLIC_API_URL}/api/requests/${requestId}`, {
+  39          withCredentials: true, // crucial
+
+Frontend\app\consumer\dashboard\page.tsx:
+  114          const res = await fetch(
+  115:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests/institutions`,
+  116            {
+
+  248          const res = await fetch(
+  249:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests/my-requests`,
+  250            {
+
+Frontend\app\consumer\profile\page.tsx:
+   49        const res = await fetch(
+   50:         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`,
+   51          {
+
+  105        const response = await fetch(
+  106:         `${process.env.NEXT_PUBLIC_API_URL}/consumer/profile`,
+  107          {
+
+Frontend\app\consumer\requests\page.tsx:
+  120          const res = await fetch(
+  121:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests/my-requests`,
+  122            {
+
+Frontend\app\consumer\submit-request\page.tsx:
+   54    useEffect(() => {
+   55:     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/requests/institutions`, {
+   56        method: "GET",
+
+  140        const res = await fetch(
+  141:         "${process.env.NEXT_PUBLIC_API_URL}/api/requests",
+  142          {
+
+Frontend\app\login\page.tsx:
+  23        "Full login URL:",
+  24:       `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`
+  25      );
+
+  29          "Attempting login to:",
+  30:         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`
+  31        );
+
+  33        const response = await fetch(
+  34:         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+  35          {
+
+Frontend\app\provider\dashboard\page.tsx:
+   59          const res = await fetch(
+   60:           "${process.env.NEXT_PUBLIC_API_URL}/api/requests",
+   61            {
+
+  121          const res = await fetch(
+  122:           "${process.env.NEXT_PUBLIC_API_URL}/api/requests/stats"
+  123          );
+
+  179        const res = await fetch(
+  180:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${selectedRequest.id}/request-more-info`,
+  181          {
+
+Frontend\app\provider\notifications\page.tsx:
+   62          const notifRes = await fetch(
+   63:           `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`,
+   64            {
+
+   75          const requestsRes = await fetch(
+   76:           "${process.env.NEXT_PUBLIC_API_URL}/api/requests/universal-requests",
+   77            { credentials: "include" }
+
+  101        const res = await fetch(
+  102:         `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${id}`,
+  103          {
+
+  116        await fetch(
+  117:         `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/mark-all-read`,
+  118          {
+
+Frontend\app\provider\requests\page.tsx:
+   60          const res = await fetch(
+   61:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests`,
+   62            {
+
+   72          const historyResponse = await fetch(
+   73:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests/history`,
+   74            { credentials: "include" }
+
+  133        const response = await fetch(
+  134:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${requestId}/approve`,
+  135          {
+
+  165        const response = await fetch(
+  166:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${requestId}/reject`,
+  167          {
+
+  222        const res = await fetch(
+  223:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${selectedRequest.id}/send-info`,
+  224          {
+
+  267        const response = await fetch(
+  268:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${moreInfoRequestId}/request-more-info`,
+  269          {
+
+Frontend\app\register\page.tsx:
+  56        const response = await fetch(
+  57:         "${process.env.NEXT_PUBLIC_API_URL}/api/admin/institutions",
+  58          {
+
+Frontend\components\dashboard-layout.tsx:
+   94        const response = await fetch(
+   95:         "${process.env.NEXT_PUBLIC_API_URL}/api/auth/me",
+   96          {
+
+  134      try {
+  135:       await fetch("${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout", {
+  136          method: "POST",
+
+Frontend\components\Header.tsx:
+   66      try {
+   67:       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/unread`);
+   68        if (!res.ok) throw new Error("Failed to fetch notifications");
+
+   90        const res = await fetch(
+   91:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${requestId}/notifications`
+   92        );
+
+  118        const res = await fetch(
+  119:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${requestId}/notifications`,
+  120          {
+
+  158        const res = await fetch(
+  159:         `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${notificationId}/read`,
+  160          {
+
+  182        const res = await fetch(
+  183:         `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${notificationId}`,
+  184          {
+
+  221      try {
+  222:       await fetch("${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout", {
+  223          method: "POST",
+
+Frontend\components\InstitutionSelector.tsx:
+  48          const res = await fetch(
+  49:           "${process.env.NEXT_PUBLIC_API_URL}/api/requests/institutions",
+  50            {
+
+Frontend\components\SubmissionQueue.tsx:
+  91        const response = await fetch(
+  92:         "${process.env.NEXT_PUBLIC_API_URL}/api/submit",
+  93          {

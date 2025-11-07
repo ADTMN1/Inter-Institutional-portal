@@ -58,7 +58,7 @@ export default function IncomingRequestsPage() {
       try {
         // Fetch requests
         const res = await fetch(
-          "${process.env.NEXT_PUBLIC_API_URL}/api/requests",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/requests`,
           {
             credentials: "include",
           }
@@ -70,7 +70,7 @@ export default function IncomingRequestsPage() {
 
         // Fetch history
         const historyResponse = await fetch(
-          "${process.env.NEXT_PUBLIC_API_URL}/api/requests/history",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/requests/history`,
           { credentials: "include" }
         );
         if (!historyResponse.ok) throw new Error("Failed to fetch history");

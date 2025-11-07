@@ -60,7 +60,7 @@ export default function NotificationsPage() {
       try {
         // Fetch notifications
         const notifRes = await fetch(
-          "${process.env.NEXT_PUBLIC_API_URL}/api/notifications",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`,
           {
             credentials: "include",
           }
@@ -73,7 +73,7 @@ export default function NotificationsPage() {
 
         // Fetch universal requests
         const requestsRes = await fetch(
-          "${process.env.NEXT_PUBLIC_API_URL}/api/requests/universal-requests",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/requests/universal-requests`,
           { credentials: "include" }
         );
         const requestsData = await requestsRes.json();
@@ -114,7 +114,7 @@ export default function NotificationsPage() {
   const markAllAsRead = async () => {
     try {
       await fetch(
-        "${process.env.NEXT_PUBLIC_API_URL}/api/notifications/mark-all-read",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/mark-all-read`,
         {
           method: "PATCH",
         }

@@ -118,7 +118,7 @@ export default function MyRequestsPage() {
       setIsLoading(true);
       try {
         const res = await fetch(
-          "${process.env.NEXT_PUBLIC_API_URL}/api/requests/my-requests",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/requests/my-requests`,
           {
             credentials: "include", // if you're using cookies/session
           }

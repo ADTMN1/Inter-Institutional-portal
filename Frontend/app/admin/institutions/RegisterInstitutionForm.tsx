@@ -188,7 +188,7 @@ export default function RegisterInstitutionForm({
 
     try {
       const response = await fetch(
-        "${process.env.NEXT_PUBLIC_API_URL}/api/admin/institutions",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/institutions`,
         {
           method: "POST",
           headers: {

@@ -64,7 +64,7 @@ export default function InstitutionsPage() {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          "${process.env.NEXT_PUBLIC_API_URL}/api/admin/institutions",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/admin/institutions`,
           {
             method: "GET",
             headers: {

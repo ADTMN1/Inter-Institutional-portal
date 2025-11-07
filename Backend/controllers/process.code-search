@@ -1,0 +1,367 @@
+# Query: process
+# ContextLines: 1
+
+92 results - 31 files
+
+Backend\server.js:
+  56  
+  57: const PORT = process.env.PORT || 5000;
+  58  app.listen(PORT, "0.0.0.0", () => {
+
+Backend\config\db.js:
+   4  console.log("🔧 Database Configuration:");
+   5: console.log("Host:", process.env.HOST);
+   6: console.log("Port:", process.env.DB_PORT);
+   7  
+   8  const connection = mysql.createConnection({
+   9:   host: process.env.HOST,
+  10:   user: process.env.USER,
+  11:   password: process.env.PASSWORD,
+  12:   database: process.env.DATABASE,
+  13:   port: process.env.DB_PORT,
+  14    ssl: {
+
+Backend\controllers\authController.js:
+  5  
+  6: const JWT_SECRET = process.env.JWT_SECRET || "secret";
+  7: const isProd = process.env.NODE_ENV === "production";
+  8  
+
+Backend\controllers\consumerController.js:
+  8      const providerResponse = await axios.post(
+  9:       `${process.env.NEXT_PUBLIC_API_URL}/provider/get-api-url`,
+  10        { service_title, description, purpose }
+
+Backend\middlewares\auth.js:
+  1  const jwt = require("jsonwebtoken");
+  2: const JWT_SECRET = process.env.JWT_SECRET || "secret";
+  3  
+
+Frontend\next.config.mjs:
+  16    //       source: "/api/:path*",
+  17:   //       destination: "${process.env.NEXT_PUBLIC_API_URL}/api/:path*",
+  18    //     },
+
+Frontend\app\about\page.tsx:
+  164                <CardDescription className="text-lg">
+  165:                 A streamlined process designed for efficiency and security
+  166                </CardDescription>
+
+  230                  </div>
+  231:                 <div className="text-gray-600">API Requests Processed</div>
+  232                </div>
+
+Frontend\app\admin\dashboard\layout.tsx:
+  4  
+  5: const JWT_SECRET = process.env.JWT_SECRET || "secret";
+  6  
+
+Frontend\app\admin\dashboard\page.tsx:
+   70          const usersRes = await axios.get(
+   71:           `${process.env.NEXT_PUBLIC_API_URL}/api/admin/user-stats`,
+   72            {
+
+  115          await axios.get(
+  116:           `${process.env.NEXT_PUBLIC_API_URL}/api/admin/institutions`,
+  117            {
+
+  204          dataType: "Customer Credit Scores",
+  205:         recordsProcessed: 1247,
+  206:         processingTime: "3 minutes 45 seconds",
+  207          dataSize: "1.8 MB",
+
+Frontend\app\admin\institutions\page.tsx:
+   66          const response = await fetch(
+   67:           `${process.env.NEXT_PUBLIC_API_URL}/api/admin/institutions`,
+   68            {
+
+  538                          const response = await fetch(
+  539:                           `${process.env.NEXT_PUBLIC_API_URL}/api/institution/${selectedInstitution.id}`,
+  540                            {
+
+Frontend\app\admin\institutions\RegisterInstitutionForm.tsx:
+  190        const response = await fetch(
+  191:         `${process.env.NEXT_PUBLIC_API_URL}/api/admin/institutions`,
+  192          {
+
+Frontend\app\admin\notifications\page.tsx:
+  62        const res = await fetch(
+  63:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${requestId}/notifications`
+  64        );
+
+  76      await fetch(
+  77:       `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${id}/read`,
+  78        {
+
+  88      await fetch(
+  89:       `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${id}/unread`,
+  90        {
+
+Frontend\app\admin\requests\page.tsx:
+   75          const res = await fetch(
+   76:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests`
+   77          );
+
+   97          const response = await fetch(
+   98:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests/:requestId/notifications`
+   99          ); // your API endpoint here
+
+  159          const res = await fetch(
+  160:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests${request.id}`
+  161          );
+
+  182        const res = await fetch(
+  183:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${requestId}/stop-conversation`,
+  184          {
+
+  206        const res = await fetch(
+  207:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${requestId}/resume-conversation`,
+  208          {
+
+  319        const res = await fetch(
+  320:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests`
+  321        );
+
+Frontend\app\consumer\[requestId]\[id]\page.tsx:
+  37      axios
+  38:       .get(`${process.env.NEXT_PUBLIC_API_URL}/api/requests/${requestId}`, {
+  39          withCredentials: true, // crucial
+
+Frontend\app\consumer\dashboard\page.tsx:
+  114          const res = await fetch(
+  115:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests/institutions`,
+  116            {
+
+  248          const res = await fetch(
+  249:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests/my-requests`,
+  250            {
+
+  650                              <p className="text-sm font-medium text-blue-800">
+  651:                               Processing Progress
+  652                              </p>
+
+  658                            <p className="text-xs text-blue-600 mt-2">
+  659:                             Your request is being processed by{" "}
+  660                              {request.provider}
+
+Frontend\app\consumer\profile\page.tsx:
+   49        const res = await fetch(
+   50:         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`,
+   51          {
+
+  105        const response = await fetch(
+  106:         `${process.env.NEXT_PUBLIC_API_URL}/consumer/profile`,
+  107          {
+
+Frontend\app\consumer\requests\page.tsx:
+  120          const res = await fetch(
+  121:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests/my-requests`,
+  122            {
+
+Frontend\app\consumer\submit-request\page.tsx:
+   54    useEffect(() => {
+   55:     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/requests/institutions`, {
+   56        method: "GET",
+
+  140        const res = await fetch(
+  141:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests`,
+  142          {
+
+Frontend\app\login\page.tsx:
+   20      // DEBUG: Check what URL is being used
+   21:     console.log("Environment API URL:", process.env.NEXT_PUBLIC_API_URL);
+   22      console.log(
+   23        "Full login URL:",
+   24:       `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`
+   25      );
+
+   29          "Attempting login to:",
+   30:         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`
+   31        );
+
+   33        const response = await fetch(
+   34:         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+   35          {
+
+  114            console.error("Token decode error:", decodeError);
+  115:           setError("Failed to process login information");
+  116          }
+
+Frontend\app\provider\dashboard\page.tsx:
+   59          const res = await fetch(
+   60:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests`,
+   61            {
+
+  121          const res = await fetch(
+  122:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests/stats`
+  123          );
+
+  179        const res = await fetch(
+  180:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${selectedRequest.id}/request-more-info`,
+  181          {
+
+Frontend\app\provider\notifications\page.tsx:
+   62          const notifRes = await fetch(
+   63:           `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`,
+   64            {
+
+   75          const requestsRes = await fetch(
+   76:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests/universal-requests`,
+   77            { credentials: "include" }
+
+  101        const res = await fetch(
+  102:         `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${id}`,
+  103          {
+
+  116        await fetch(
+  117:         `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/mark-all-read`,
+  118          {
+
+Frontend\app\provider\requests\page.tsx:
+   60          const res = await fetch(
+   61:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests`,
+   62            {
+
+   72          const historyResponse = await fetch(
+   73:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests/history`,
+   74            { credentials: "include" }
+
+  133        const response = await fetch(
+  134:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${requestId}/approve`,
+  135          {
+
+  165        const response = await fetch(
+  166:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${requestId}/reject`,
+  167          {
+
+  222        const res = await fetch(
+  223:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${selectedRequest.id}/send-info`,
+  224          {
+
+  267        const response = await fetch(
+  268:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${moreInfoRequestId}/request-more-info`,
+  269          {
+
+  421                        <p className="text-gray-500">
+  422:                         All current requests have been processed
+  423                        </p>
+
+Frontend\app\register\page.tsx:
+  56        const response = await fetch(
+  57:         `${process.env.NEXT_PUBLIC_API_URL}/api/admin/institutions`,
+  58          {
+
+Frontend\app\universal\page.tsx:
+  125                  Submit your documents to multiple institutions in one
+  126:                 streamlined process
+  127                </p>
+
+Frontend\components\about-us.tsx:
+  30  
+  31: Our platform is designed to make information exchange fast, safe, and easy. Instead of using paper or long processes, institutions can now send and receive information in a few clicks.
+  32  
+
+Frontend\components\dashboard-layout.tsx:
+   94        const response = await fetch(
+   95:         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`,
+   96          {
+
+  134      try {
+  135:       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
+  136          method: "POST",
+
+Frontend\components\Header.tsx:
+   66      try {
+   67:       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/unread`);
+   68        if (!res.ok) throw new Error("Failed to fetch notifications");
+
+   90        const res = await fetch(
+   91:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${requestId}/notifications`
+   92        );
+
+  118        const res = await fetch(
+  119:         `${process.env.NEXT_PUBLIC_API_URL}/api/requests/${requestId}/notifications`,
+  120          {
+
+  158        const res = await fetch(
+  159:         `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${notificationId}/read`,
+  160          {
+
+  182        const res = await fetch(
+  183:         `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${notificationId}`,
+  184          {
+
+  221      try {
+  222:       await fetch("${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout", {
+  223          method: "POST",
+
+Frontend\components\how-it-works.tsx:
+  42          <p className="text-sm font-semibold text-indigo-500 uppercase mb-2">
+  43:           A Simple Process
+  44          </p>
+  45          <h2 className="text-4xl font-bold text-gray-900 mb-16">
+  46:           Our Working Process
+  47          </h2>
+
+Frontend\components\InstitutionSelector.tsx:
+  48          const res = await fetch(
+  49:           `${process.env.NEXT_PUBLIC_API_URL}/api/requests/institutions`,
+  50            {
+
+Frontend\components\SubmissionQueue.tsx:
+   26    institution: Institution;
+   27:   status: "pending" | "processing" | "completed" | "error";
+   28    timestamp?: Date;
+
+   56  
+   57:   const simulateFileProcessing = async (file: File): Promise<string> => {
+   58      return new Promise((resolve) => {
+   59        setTimeout(() => {
+   60:         resolve(`processed_${file.name}`);
+   61        }, 1000 + Math.random() * 2000);
+
+   70          sub.institution.id === institution.id
+   71:           ? { ...sub, status: "processing", progress: 0 }
+   72            : sub
+
+   91        const response = await fetch(
+   92:         `${process.env.NEXT_PUBLIC_API_URL}/api/submit`,
+   93          {
+
+  159          nationalId
+  160:           ? simulateFileProcessing(nationalId.file)
+  161            : Promise.resolve(),
+  162:         ...supportingDocs.map((doc) => simulateFileProcessing(doc.file)),
+  163        ]);
+
+  205          return <Clock className="w-4 h-4 text-muted-foreground" />;
+  206:       case "processing":
+  207          return <Send className="w-4 h-4 text-primary animate-pulse" />;
+
+  218          return <Badge variant="secondary">Pending</Badge>;
+  219:       case "processing":
+  220          return (
+  221            <Badge className="bg-primary text-primary-foreground">
+  222:             Processing
+  223            </Badge>
+
+  385  
+  386:                 {submission.status === "processing" && (
+  387                    <div className="space-y-1">
+  388                      <div className="flex justify-between text-sm">
+  389:                       <span>Processing...</span>
+  390                        <span>{Math.round(submission.progress)}%</span>
+
+Frontend\lib\notificationcontext.tsx:
+  35      console.log("🔍 NotificationsProvider mounted");
+  36:     console.log("NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
+  37:     console.log("Type of env var:", typeof process.env.NEXT_PUBLIC_API_URL);
+  38  
+  39:     if (!process.env.NEXT_PUBLIC_API_URL) {
+  40        console.error("❌ NEXT_PUBLIC_API_URL is undefined!");
+  41:     } else if (process.env.NEXT_PUBLIC_API_URL.includes("$%7B")) {
+  42        console.error(
+
+  48    const getApiUrl = (endpoint: string) => {
+  49:     const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  50  

@@ -47,7 +47,7 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     try {
       const res = await fetch(
-        "${process.env.NEXT_PUBLIC_API_URL}/api/auth/me",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`,
         {
           credentials: "include",
         }
@@ -103,7 +103,7 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       const response = await fetch(
-        "${process.env.NEXT_PUBLIC_API_URL}/consumer/profile",
+        `${process.env.NEXT_PUBLIC_API_URL}/consumer/profile`,
         {
           method: "PUT",
           headers: {

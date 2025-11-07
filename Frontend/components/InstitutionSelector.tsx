@@ -46,7 +46,7 @@ export const InstitutionSelector = ({
     const fetchInstitutions = async () => {
       try {
         const res = await fetch(
-          "${process.env.NEXT_PUBLIC_API_URL}/api/requests/institutions",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/requests/institutions`,
           {
             method: "GET",
             credentials: "include", // 🔹 sends cookies/session data

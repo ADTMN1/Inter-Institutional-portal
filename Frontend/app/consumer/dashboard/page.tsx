@@ -112,7 +112,7 @@ function DashboardContent() {
         const token = localStorage.getItem("token");
 
         const res = await fetch(
-          "${process.env.NEXT_PUBLIC_API_URL}/api/requests/institutions",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/requests/institutions`,
           {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
             credentials: "include",
@@ -246,7 +246,7 @@ function DashboardContent() {
     const loadRequests = async () => {
       try {
         const res = await fetch(
-          "${process.env.NEXT_PUBLIC_API_URL}/api/requests/my-requests",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/requests/my-requests`,
           {
             credentials: "include",
           }

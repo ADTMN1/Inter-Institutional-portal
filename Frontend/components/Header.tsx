@@ -64,7 +64,9 @@ function HeaderContent() {
   // Fetch notifications from backend for specific request
   const fetchAllNotifications = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/unread`);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/unread`
+      );
       if (!res.ok) throw new Error("Failed to fetch notifications");
 
       const data = await res.json();
@@ -219,7 +221,7 @@ function HeaderContent() {
   // Logout handler
   const handleLogout = async () => {
     try {
-      await fetch("${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout", {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
         method: "POST",
         credentials: "include",
       });

@@ -17,6 +17,13 @@ export default function LoginPage() {
       return;
     }
 
+    // DEBUG: Check what URL is being used
+    console.log("Environment API URL:", process.env.NEXT_PUBLIC_API_URL);
+    console.log(
+      "Full login URL:",
+      `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`
+    );
+
     try {
       console.log(
         "Attempting login to:",
@@ -56,24 +63,59 @@ export default function LoginPage() {
 
       console.log("Login successful, data:", data);
 
-      // If login is successful, you might not need the /api/auth/me call immediately
-      // Let's simplify and just use the data from login response
-      if (data.success && data.user) {
-        const userRole = data.user.role?.toLowerCase() || data.user.role;
+      // ✅ CORRECTED SECTION: Store token and decode user role
+      if (data.token) {
+        // Store the token in localStorage
+        localStorage.setItem("token", data.token);
+        console.log("Token stored in localStorage");
 
-        console.log("User role:", userRole);
+        // Decode role from JWT token
+        try {
+          const tokenParts = data.token.split(".");
+          if (tokenParts.length === 3) {
+            const payload = JSON.parse(atob(tokenParts[1]));
+            const userRole = payload.role?.toLowerCase();
+            const userEmail = payload.email;
+            const userId = payload.id;
 
-        if (userRole === "admin") {
-          router.push("/admin");
-        } else if (userRole === "contactperson") {
-          router.push("/welcome");
-        } else if (userRole === "universal") {
-          router.push("/universal");
-        } else {
-          router.push("/");
+            console.log("Decoded user data from token:", {
+              id: userId,
+              email: userEmail,
+              role: userRole,
+            });
+
+            // ✅ Store user data in localStorage
+            localStorage.setItem(
+              "user",
+              JSON.stringify({
+                id: userId,
+                email: userEmail,
+                role: userRole,
+              })
+            );
+
+            console.log("User role:", userRole);
+
+            // ✅ Redirect based on role
+            if (userRole === "admin") {
+              router.push("/admin");
+            } else if (userRole === "contactperson") {
+              router.push("/welcome");
+            } else if (userRole === "universal") {
+              router.push("/universal");
+            } else {
+              console.warn("Unknown role, redirecting to default page");
+              router.push("/");
+            }
+          } else {
+            setError("Invalid token format received");
+          }
+        } catch (decodeError) {
+          console.error("Token decode error:", decodeError);
+          setError("Failed to process login information");
         }
       } else {
-        setError("Invalid response from server");
+        setError("No authentication token received from server");
       }
     } catch (err) {
       console.error("Login error:", err);

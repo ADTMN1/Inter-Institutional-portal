@@ -68,7 +68,7 @@ export default function DashboardPage() {
         });
 
         const usersRes = await axios.get(
-          "${process.env.NEXT_PUBLIC_API_URL}/api/admin/user-stats",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/admin/user-stats`,
           {
             withCredentials: true,
           }
@@ -113,7 +113,7 @@ export default function DashboardPage() {
     const checkAuth = async () => {
       try {
         await axios.get(
-          "${process.env.NEXT_PUBLIC_API_URL}/api/admin/institutions",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/admin/institutions`,
           {
             withCredentials: true,
           }
