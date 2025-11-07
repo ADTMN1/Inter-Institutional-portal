@@ -121,8 +121,8 @@ exports.logout = (req, res) => {
 
   res.setHeader("Set-Cookie", cookie);
 
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
+  // res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+  // res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Vary", "Origin");
 
   res.status(200).json({ message: "Logged out successfully" });
