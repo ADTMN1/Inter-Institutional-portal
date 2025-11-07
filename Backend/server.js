@@ -26,6 +26,7 @@ app.use(
   cors({
     origin: [
       "https://inter-institutional-portal-iqqh.vercel.app",
+      "https://inter-institutional-portal.vercel.app/",
       "http://localhost:3000",
     ],
     credentials: true,
